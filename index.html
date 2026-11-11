@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>qwymyX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&family=Unbounded:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  --bg:#0E0B16; --surface:#1A1526; --line:#2B2340; --text:#F5F3FF; --muted:#9A91B3;
+  --purple:#8B5CF6; --purple-soft:#B79CFF; --ok:#4ADE80; --warn:#F5B544; --off:#8A8399;
+  --sans:'Manrope',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --display:'Unbounded','Manrope',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.45}
+body{min-height:100vh;padding:0 16px calc(88px + env(safe-area-inset-bottom,0px))}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid var(--purple-soft);outline-offset:2px}
+
+.top{display:flex;align-items:center;justify-content:space-between;padding:18px 0 14px}
+.wm{font-family:var(--display);font-weight:600;font-size:22px;letter-spacing:-.02em;color:#fff}
+.wm b{color:var(--purple);font-weight:600}
+.chip{font-size:13px;font-weight:700;color:var(--purple-soft);border:1px solid var(--line);border-radius:999px;padding:6px 12px}
+
+h1{font-family:var(--display);font-weight:500;font-size:20px;letter-spacing:-.01em;margin:6px 0 16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px}
+.field label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}
+.inp{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:0 14px}
+.inp:focus-within{border-color:var(--purple)}
+.inp input{flex:1;min-width:0;background:none;border:0;outline:0;padding:14px 0;font-size:18px;font-weight:700}
+.inp span{color:var(--muted);font-size:13px;white-space:nowrap}
+.get{font-family:var(--display);font-weight:500;font-size:28px;margin:2px 0 0;word-break:break-all}
+.get small{font-size:16px;color:var(--muted)}
+.hint{color:var(--muted);font-size:13px;margin-top:10px}
+.err{color:#FF8FA3;font-size:13px;margin-top:10px;min-height:18px}
+
+a.btn{text-decoration:none;color:inherit}
+.btn{display:block;width:100%;border-radius:14px;padding:15px;font-weight:700;text-align:center;margin-top:10px}
+.btn.pri{background:var(--purple);color:#fff}
+.btn.pri:active{background:#7444E0}
+.btn.sec{background:var(--surface);border:1px solid var(--line)}
+.btn.ghost{color:var(--muted)}
+
+.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--surface);border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px))}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-size:12px;font-weight:700;padding:6px 0;border-radius:12px}
+.tab svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tab.on{color:var(--purple-soft)}
+
+.seg{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:3px;margin-bottom:14px}
+.seg button{flex:1;padding:9px;border-radius:9px;color:var(--muted);font-weight:700}
+.seg button.on{background:var(--purple);color:#fff}
+
+.ord{display:block;width:100%;text-align:left}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.ord .amt{font-weight:700;font-size:16px}
+.ord .sub{color:var(--muted);font-size:13px;margin-top:4px}
+.st{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700}
+.st i{width:8px;height:8px;border-radius:50%;background:currentColor}
+.st.awaiting{color:var(--warn)}.st.processing{color:var(--purple-soft)}.st.done{color:var(--ok)}.st.cancelled{color:var(--off)}
+.timer{font-family:var(--display);font-weight:500;color:var(--purple-soft);font-variant-numeric:tabular-nums}
+
+.addr{background:var(--bg);border:1px dashed var(--purple);border-radius:12px;padding:12px;word-break:break-all;font-weight:500;font-size:14px;user-select:all}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+.kv:last-child{border:0}.kv span:first-child{color:var(--muted)}.kv span:last-child{text-align:right;font-weight:700;word-break:break-word}
+.warn{background:rgba(245,181,68,.1);border:1px solid rgba(245,181,68,.35);border-radius:12px;padding:12px;font-size:13px;margin-top:12px}
+.back{color:var(--purple-soft);font-weight:700;padding:6px 0 10px}
+.empty{color:var(--muted);text-align:center;padding:36px 12px}
+ol.faq{padding-left:18px;color:var(--muted)} ol.faq li{margin-bottom:8px}
+.wz-main{min-height:calc(100vh - 100px);min-height:calc(100svh - 100px)}
+.faqbox{margin-top:28px}
+.faqbox h2{font-family:var(--display);font-weight:500;font-size:17px;margin:0 0 12px}
+.why{list-style:none;padding:0}
+.why li{padding:11px 0 11px 14px;border-left:2px solid var(--purple);margin-bottom:10px;background:var(--surface);border-radius:0 12px 12px 0;padding-right:14px}
+.why b{display:block;margin-bottom:2px}
+.why span{color:var(--muted);font-size:14px}
+details.q{background:var(--surface);border:1px solid var(--line);border-radius:14px;margin-bottom:8px}
+details.q summary{list-style:none;cursor:pointer;padding:14px;font-weight:700;display:flex;justify-content:space-between;gap:10px}
+details.q summary::-webkit-details-marker{display:none}
+details.q summary::after{content:'+';color:var(--purple-soft);font-size:18px;line-height:1}
+details.q[open] summary::after{content:'–'}
+details.q p{padding:0 14px 14px;color:var(--muted);font-size:14px}
+.starpick{display:flex;gap:6px;margin:4px 0 14px}
+.starpick button{font-size:34px;line-height:1;color:var(--off);padding:2px}
+.starpick button.on{color:var(--warn)}
+.stars{color:var(--warn);font-size:18px;letter-spacing:2px}
+.rsub{color:var(--muted);font-size:13px}
+.rtxt{margin:8px 0 4px;word-break:break-word;white-space:pre-wrap}
+textarea#rtext{width:100%;min-height:110px;resize:vertical;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px;outline:0}
+textarea#rtext:focus{border-color:var(--purple)}
+.bankpick{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-height:56px;font-weight:700}
+.bankpick:active{border-color:var(--purple)}
+.bankpick .ph{color:var(--muted);font-weight:500}
+.bankpick .arr{color:var(--purple-soft);font-size:22px;line-height:1}
+.bn{display:flex;align-items:center;gap:12px;min-width:0}
+.bi{flex:none;position:relative;overflow:hidden;width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;font-family:var(--sans)}
+.bi img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:5px;background:#fff}
+.bi.has>span{visibility:hidden}
+.sh-back{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.62);width:100%;height:100%}
+.sh-box{position:fixed;left:0;right:0;bottom:0;z-index:51;max-height:82vh;display:flex;flex-direction:column;background:var(--surface);border-radius:20px 20px 0 0;border-top:1px solid var(--line);padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.sh-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-family:var(--display);font-weight:500;font-size:17px}
+.sh-head button{color:var(--muted);font-size:20px;padding:4px 8px}
+.sh-list{overflow-y:auto;margin-top:10px;flex:1;-webkit-overflow-scrolling:touch}
+.bk{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:10px 4px;border-bottom:1px solid var(--line);font-weight:600}
+.bk:active{background:var(--bg)}
+.lnk{color:var(--purple-soft);font-weight:700;text-decoration:underline}
+.nets{display:flex;gap:8px}
+.nets button{flex:1;text-align:center;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 4px;font-weight:800}
+.nets button small{display:block;color:var(--muted);font-weight:500;font-size:11px}
+.nets button.on{border-color:var(--purple);background:rgba(139,92,246,.16)}
+.intro{font-size:15px}
+.hero{position:relative;text-align:center;margin:0 -16px 6px;padding:34px 20px 22px;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:-40px 0 auto 0;height:340px;background:radial-gradient(55% 60% at 50% 0%,rgba(139,92,246,.38),transparent 72%);pointer-events:none}
+.hero>*{position:relative}
+.hero .logo{width:92px;height:92px;filter:drop-shadow(0 0 16px rgba(139,92,246,.65))}
+.hero .wm{font-size:36px;margin-top:10px}
+.hero p{color:#CFC8E6;margin:14px auto 0;max-width:34ch;font-size:15px}
+.ratepill{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(26,21,38,.8);font-weight:700;font-size:14px}
+.ratepill i{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.hero .btn{margin-top:18px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 4px}
+.stats div{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 6px;text-align:center}
+.stats b{display:block;font-family:var(--display);font-weight:500;font-size:19px;color:#fff}
+.stats span{color:var(--muted);font-size:12px}
+.sec{font-family:var(--display);font-weight:500;font-size:17px;margin:26px 0 12px}
+.feat{display:flex;gap:14px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:10px}
+.feat .ico{flex:none;width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(60,200,255,.16),rgba(139,92,246,.22));color:var(--purple-soft)}
+.feat .ico svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.feat b{display:block;margin-bottom:2px}
+.feat span{color:var(--muted);font-size:14px}
+.steps{list-style:none;padding:0;counter-reset:s}
+.steps li{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);counter-increment:s}
+.steps li:last-child{border:0}
+.steps li::before{content:counter(s);flex:none;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;background:var(--purple)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips span{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-weight:700;font-size:14px}
+.chips span.hl{border-color:var(--purple);color:var(--purple-soft)}
+.rise{animation:rise .5s both}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}}
+@media (prefers-reduced-motion:reduce){.rise{animation:none}}
+.wz-top{display:flex;justify-content:space-between;align-items:center;min-height:34px}
+.bar{height:4px;background:var(--line);border-radius:4px;margin:4px 0 16px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#3CC8FF,var(--purple));border-radius:4px;transition:width .3s}
+.netlist{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.netopt{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px}
+.netopt b{display:block;font-size:16px}
+.netopt small{color:var(--muted);font-size:13px}
+.netopt .radio{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--off)}
+.netopt.on{border-color:var(--purple);background:rgba(139,92,246,.14)}
+.netopt.on .radio{border-color:var(--purple);background:radial-gradient(circle,var(--purple) 0 45%,transparent 50%)}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+#toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#fff;color:#0E0B16;font-weight:700;padding:10px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="top"><div class="wm">qwymy<b>X</b></div><div class="chip" id="rate-chip"></div></div>
+<main id="app"></main>
+<nav class="tabs" id="tabs">
+  <button class="tab" data-tab="home"><svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8M5 10v10h14V10"/></svg>Главное</button>
+  <button class="tab" data-tab="exchange"><svg viewBox="0 0 24 24"><path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4m4 4H7"/></svg>Обмен</button>
+  <button class="tab" data-tab="orders"><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>Заказы</button>
+  <button class="tab" data-tab="support"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/></svg>Support</button>
+</nav>
+<div id="toast"></div>
+
+<script>
+/* ===== НАСТРОЙКИ: меняйте курс здесь (₽ за 1 USDT) ===== */
+const RATE = 82.3, MIN = 10, HOUR = 3600e3;
+const fr = n => Number(n).toLocaleString('ru-RU');
+document.getElementById('rate-chip').textContent = '1 USDT = ' + fr(RATE) + ' ₽';
+/* Сети и адреса для приёма USDT. */
+const NETS = {
+  TRC20: {name:'TRC20', sub:'TRON',      addr:'TUSSZRHDGW1pe66Ump1AYRkien2VaG2VPL', memo:false},
+  TON:   {name:'TON',   sub:'TON',       addr:'UQAwi0T0XqI93ioCyr39iYPzSh0GRw01GCpDXVvI_9iZfEqX', memo:false},
+  BEP20: {name:'BEP20', sub:'BNB Chain', addr:'0xb8aA166073Bd9763Cbd88Dffd870746C8cDb628a', memo:false}
+};
+const SUPPORT = 'qwymyX_support';
+const LABEL = {awaiting:'Ожидает отправки USDT', processing:'В обработке', done:'Выполнен', cancelled:'Отменён'};
+
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) { tg.ready(); tg.expand(); try{ tg.setHeaderColor('#0E0B16'); tg.setBackgroundColor('#0E0B16'); }catch(e){} }
+
+/* ---------- хранилище: Telegram CloudStorage (по аккаунту) или localStorage ---------- */
+const useCloud = !!(tg && tg.initData && tg.CloudStorage);
+const store = {
+  get(){ return new Promise(res=>{
+    try{
+      if(useCloud) tg.CloudStorage.getItem('orders',(e,v)=>res(v?JSON.parse(v):[]));
+      else res(JSON.parse(localStorage.getItem('orders')||'[]'));
+    }catch(e){ res([]); }
+  });},
+  set(list){ let l = list.slice(0,25), v = JSON.stringify(l); while(v.length>3900 && l.length>1){ l.pop(); v = JSON.stringify(l); }
+    try{ if(useCloud) tg.CloudStorage.setItem('orders', v); else localStorage.setItem('orders', v); }catch(e){}
+  }
+};
+
+const rstore = {
+  get(){ return new Promise(res=>{ try{
+    if(useCloud) tg.CloudStorage.getItem('review',(e,v)=>res(v?JSON.parse(v):null));
+    else res(JSON.parse(localStorage.getItem('review')||'null'));
+  }catch(e){ res(null); } }); },
+  set(v){ const s = JSON.stringify(v);
+    try{ if(useCloud) tg.CloudStorage.setItem('review', s); else localStorage.setItem('review', s); }catch(e){} }
+};
+
+/* Отзывы клиентов, которые показываются всем. Добавляйте сюда настоящие отзывы:
+   {name:'Алексей', stars:5, text:'Всё быстро, выплата пришла за 20 минут.', date:'09.11.2026'} */
+const REVIEWS = [];
+
+let myReview = null, editing = false, draft = {stars:0, text:''}, rerr = '';
+let orders = [], tab = 'home', seg = 'current', openId = null;
+let form = {usdt:'', bank:'', num:'', pname:'', net:'TON', step:1}, error = '';
+
+/* Банки РФ: [название, цвет значка, цвет буквы]. Значки — цветные метки, не официальные логотипы. */
+const BANKS = [
+ ['Сбербанк','#21A038'],['Т-Банк','#FFDD2D','#111'],['ВТБ','#0A2896'],['Альфа-Банк','#EF3124'],
+ ['Газпромбанк','#1F5FBF'],['Райффайзенбанк','#FEE600','#111'],['Россельхозбанк','#0B8F4C'],['Совкомбанк','#D9232D'],
+ ['Банк Открытие','#00AEEF'],['ПСБ','#F26B21'],['Почта Банк','#1C4FA0'],['МТС Банк','#E30611'],
+ ['Росбанк','#D4001F'],['ЮниКредит Банк','#D3002B'],['Ozon Банк','#005BFF'],['Яндекс Банк','#FC3F1D'],
+ ['WB Банк','#CB11AB'],['Банк Санкт-Петербург','#C8102E'],['Ак Барс Банк','#00A651'],['Уралсиб','#00A0DF'],
+ ['Хоум Банк','#E4002B'],['Русский Стандарт','#00833E'],['МКБ','#E3000F'],['Банк ДОМ.РФ','#FF6A13'],
+ ['Авангард','#1B3C8C'],['Абсолют Банк','#00A0A0'],['Банк Зенит','#7B2D8E'],['Новикомбанк','#0057A8'],
+ ['РНКБ','#0067B1'],['Локо-Банк','#1FA64A'],['Банк Синара','#00A3E0'],['Ренессанс Кредит','#F26522'],
+ ['Экспобанк','#E2231A'],['Точка','#7040FF'],['Модульбанк','#00C389'],['ОТП Банк','#6EB43F'],
+ ['Центр-инвест','#0079C1'],['Левобережный','#F39200'],['Тойота Банк','#EB0A1E'],['СДМ-Банк','#00A0B0'],
+ ['Свой Банк','#FF6A00'],['Банк Финам','#003D7A'],['Фора-Банк','#E30613'],['Солидарность','#5B2C83'],
+ ['Банк Оренбург','#0B6E4F'],['Датабанк','#0F6FC6'],['Хлынов','#1E7F4F'],['Кредит Европа Банк','#0C5DA5'],
+ ['Дальневосточный банк','#E94E1B'],['Тинькофф Банк Бизнес','#FFDD2D','#111']
+];
+const bankLetter = n => n.replace(/^Банк\s+/,'').charAt(0).toUpperCase();
+/* Логотипы: положите файлы в папку banks/ рядом с index.html (имя = название латиницей, например sberbank.png).
+   Если файла нет, показывается цветной значок с буквой. */
+const TR = {а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'ts',ч:'ch',ш:'sh',щ:'sch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'};
+const bankSlug = n => n.toLowerCase().split('').map(c=>TR[c]!==undefined?TR[c]:c).join('').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+function bankIcon(name){
+  const b = BANKS.find(x=>x[0]===name);
+  const img = b ? `<img src="banks/${bankSlug(name)}.png" alt="" onload="this.parentNode.classList.add('has')" onerror="if(!this.dataset.t){this.dataset.t=1;this.src=this.src.replace('.png','.svg')}else{this.remove()}">` : '';
+  return `<span class="bi" style="background:${b?b[1]:'#4B4560'};color:${b&&b[2]?b[2]:'#fff'}"><span>${esc(bankLetter(name))}</span>${img}</span>`;
+}
+function fillBanks(q){
+  const raw = q.trim(), low = raw.toLowerCase();
+  const list = BANKS.filter(b=>b[0].toLowerCase().includes(low));
+  let html = list.map(b=>`<button class="bk" data-bank="${esc(b[0])}">${bankIcon(b[0])}<span>${esc(b[0])}</span></button>`).join('');
+  if(!list.length && raw.length>=2){
+    const name = raw.slice(0,30);
+    html = `<button class="bk" data-bank="${esc(name)}">${bankIcon(name)}<span>Указать вручную: «${esc(name)}»</span></button>`;
+  }
+  $('#blist').innerHTML = html || '<div class="empty">Ничего не найдено</div>';
+}
+function openSheet(){
+  const el = document.createElement('div'); el.id = 'sheet';
+  el.innerHTML = `<button class="sh-back" data-sheet="close" aria-label="Закрыть"></button>
+    <div class="sh-box"><div class="sh-head"><span>Выберите банк</span><button data-sheet="close" aria-label="Закрыть">✕</button></div>
+    <div class="inp"><input id="bsearch" placeholder="Поиск банка" autocomplete="off"></div>
+    <div class="sh-list" id="blist"></div></div>`;
+  document.body.appendChild(el); document.body.style.overflow = 'hidden'; fillBanks('');
+}
+function closeSheet(){ const el = $('#sheet'); if(el) el.remove(); document.body.style.overflow = ''; }
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rub = n => n.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2});
+const num = n => n.toLocaleString('ru-RU',{maximumFractionDigits:4});
+const when = ts => new Date(ts).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+const isActive = o => o.st==='awaiting' || o.st==='processing';
+
+function toast(t){ const el=$('#toast'); el.textContent=t; el.classList.add('on'); clearTimeout(toast.t); toast.t=setTimeout(()=>el.classList.remove('on'),1500); }
+function copy(text, msg){
+  const done = ()=>toast(msg || 'Скопировано');
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done,()=>fallback()); } else fallback();
+  function fallback(){ const t=document.createElement('textarea'); t.value=text; document.body.appendChild(t); t.select(); try{document.execCommand('copy');done();}catch(e){} t.remove(); }
+}
+function orderMessage(o){
+  const p = String(o.pay).split('\n');
+  return 'Заказ №'+o.id+'\nСеть: '+(o.net||'TON')+'\nОтдаю: '+num(o.usdt)+' USDT\nПолучаю: '+rub(o.rub)+' ₽\nБанк: '+(p[0]||'')+'\nРеквизиты: '+(p[1]||'')+'\nПолучатель: '+(p[2]||'');
+}
+function openSupport(text){
+  /* Telegram не всегда подставляет текст в чат по ссылке, поэтому дополнительно копируем его в буфер */
+  if(text) copy(text, 'Текст скопирован — вставьте его в чат');
+  const url = 'https://t.me/'+SUPPORT+(text?'?text='+encodeURIComponent(text):'');
+  if(tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url,'_blank');
+}
+function statusHtml(o){ return `<span class="st ${o.st}"><i></i>${LABEL[o.st]}</span>`; }
+function timerHtml(o){ return o.st==='processing' ? `<div class="timer" data-dl="${o.paid+HOUR}"></div>` : ''; }
+
+/* ---------- экраны ---------- */
+function faqHtml(){
+  return `<section class="faqbox">
+    <h2>Почему именно мы</h2>
+    <ul class="why">
+      <li><b>Чистые рубли</b><span>Вы получаете выплату без сомнительных переводов и проблем с происхождением денег.</span></li>
+      <li><b>Ничего не скрываем</b><span>Мы открыто говорим, откуда деньги, и не прячем происхождение средств.</span></li>
+      <li><b>Курс выше, чем в крупных обменниках</b><span>${fr(RATE)} ₽ за 1 USDT, без скрытых комиссий.</span></li>
+      <li><b>Курс не меняется</b><span>Цена фиксируется в момент создания заказа и не плавает, пока вы отправляете USDT.</span></li>
+      <li><b>Без регистрации</b><span>Нужны только реквизиты для выплаты. Никаких анкет и лишних данных.</span></li>
+      <li><b>Живая поддержка</b><span>Отвечаем в Telegram, а заказ исполняется в течение 1 часа.</span></li>
+    </ul>
+    <h2 style="margin-top:22px">Частые вопросы</h2>
+    <details class="q"><summary>Сколько ждать выплату?</summary><p>До 1 часа после того, как вы нажали «Я оплатил». Таймер виден в заказе.</p></details>
+    <details class="q"><summary>В какой сети отправлять USDT?</summary><p>Доступны сети TRC20, TON и BEP20. Выберите сеть при создании обмена и отправляйте USDT именно в ней. Переводы в другой сети и другими токенами не зачисляются.</p></details>
+<details class="q"><summary>Что делать, если выплаты нет?</summary><p>Откройте вкладку Support и напишите нам номер заказа. Разберёмся сразу.</p></details>
+  </section>`;
+}
+
+function viewExchange(){
+  const st = form.step || 1;
+  const u = parseFloat(String(form.usdt).replace(',','.')) || 0;
+  const N = NETS[form.net];
+  const top = `<div class="wz-top"><button class="back" data-act="wback" ${st>1?'':'style="visibility:hidden"'}>‹ Назад</button><span class="rsub">Шаг ${st} из 5</span></div>
+    <div class="bar"><i style="width:${st*20}%"></i></div>`;
+  const err = `<div class="err" id="err">${esc(error)}</div>`;
+  const next = label => `<button class="btn pri" data-act="wnext">${label||'Далее'}</button>`;
+  let body = '';
+  if(st===1){
+    body = `<div class="wz-main"><h1>Сколько USDT продаёте?</h1>
+    <div class="card">
+      <div class="field"><label for="usdt">Вы отдаёте</label>
+        <div class="inp"><input id="usdt" inputmode="decimal" placeholder="0" value="${esc(form.usdt)}" autocomplete="off"><span>USDT</span></div></div>
+      <div class="field" style="margin-top:16px"><label>Вы получаете</label>
+        <div class="get" id="get">${rub(u*RATE)} <small>₽</small></div></div>
+      <div class="hint">Минимум ${MIN} USDT. Курс фиксированный: ${fr(RATE)} ₽.</div>
+    </div>${err}${next()}</div>${faqHtml()}`;
+  } else if(st===2){
+    body = `<h1>Выберите сеть</h1>
+    <div class="netlist">${Object.keys(NETS).map(k=>`<button class="netopt ${form.net===k?'on':''}" data-net="${k}"><span class="radio"></span><span><b>${NETS[k].name}</b><small>${NETS[k].sub}</small></span></button>`).join('')}</div>
+    <div class="hint" style="margin:0 0 4px">Отправлять USDT нужно именно в выбранной сети.</div>${err}${next()}`;
+  } else if(st===3){
+    body = `<h1>Номер для выплаты</h1>
+    <div class="card"><div class="field"><label for="num">Номер карты или телефона</label>
+      <div class="inp"><input id="num" inputmode="numeric" maxlength="23" placeholder="Карта или +7 900 000-00-00" value="${esc(form.num)}" autocomplete="off"></div></div>
+      <div class="hint">Карта РФ (16 цифр) или номер телефона для СБП (11 цифр).</div></div>${err}${next()}`;
+  } else if(st===4){
+    body = `<h1>Выберите банк</h1>
+    <div class="inp"><input id="bsearch" placeholder="Поиск банка" autocomplete="off"></div>
+    ${form.bank ? `<div class="card" style="margin-top:12px"><div class="hint" style="margin:0 0 8px">Выбран банк:</div><span class="bn">${bankIcon(form.bank)}<b>${esc(form.bank)}</b></span></div>` : ''}
+    <div id="blist" style="margin:10px 0 14px"></div>${err}${form.bank ? next() : ''}`;
+  } else {
+    body = `<h1>Имя получателя</h1>
+    <div class="card"><div class="field"><label for="pname">Имя и фамилия</label>
+      <div class="inp"><input id="pname" maxlength="40" placeholder="Иван Иванов" value="${esc(form.pname)}" autocomplete="off"></div></div></div>
+    <div class="card">
+      <div class="kv"><span>Отдаёте</span><span>${num(u)} USDT · ${N.name}</span></div>
+      <div class="kv"><span>Получаете</span><span>${rub(Math.round(u*RATE*100)/100)} ₽</span></div>
+      <div class="kv"><span>Банк</span><span>${esc(form.bank)}</span></div>
+      <div class="kv"><span>Номер</span><span>${esc(form.num)}</span></div>
+    </div>
+    <div class="hint" style="margin:0 0 4px">Заказ исполняется в течение 1 часа после вашей отправки USDT.</div>${err}${next('Создать обмен')}`;
+  }
+  return top + body;
+}
+
+function orderCard(o){
+  return `<button class="card ord" data-act="open" data-id="${o.id}">
+    <div class="row"><span class="amt">${num(o.usdt)} USDT → ${rub(o.rub)} ₽</span>${statusHtml(o)}</div>
+    <div class="sub">№${o.id} · ${o.net||'TON'} · ${when(o.created)}</div>${timerHtml(o)}</button>`;
+}
+
+function viewOrders(){
+  const cur = orders.filter(isActive), hist = orders;
+  const list = seg==='current' ? cur : hist;
+  return `
+  <h1>Мои обмены</h1>
+  <div class="seg"><button data-seg="current" class="${seg==='current'?'on':''}">Текущие (${cur.length})</button>
+  <button data-seg="history" class="${seg==='history'?'on':''}">История (${hist.length})</button></div>
+  ${list.length ? list.map(orderCard).join('') :
+    `<div class="empty">${seg==='current'?'Текущих обменов нет.':'Вы ещё не делали обменов.'}<br>Создайте первый на вкладке «Обмен».</div>`}`;
+}
+
+function viewOrder(o){
+  const N = NETS[o.net] || NETS.TON;
+  const pay = o.st==='awaiting' ? `
+    <div class="card">
+      <div class="field"><label>Отправьте ${num(o.usdt)} USDT в сети ${N.name} (${N.sub}) на адрес</label>
+        <div class="addr">${N.addr}</div>
+        <button class="btn sec" data-act="copy" data-v="${N.addr}">Скопировать адрес</button></div>
+      <div class="warn">Принимаем только USDT в сети ${N.name}. Переводы в других сетях и другими токенами не зачисляются.</div>
+    </div>
+    <button class="btn pri" data-act="paid" data-id="${o.id}">Я оплатил</button>
+    <div class="hint">Откроется чат с поддержкой, а данные заказа (сумма, банк, реквизиты, получатель) скопируются. Вставьте их в сообщение и отправьте.</div>
+    <button class="btn ghost" data-act="cancel" data-id="${o.id}">Отменить заказ</button>` : '';
+  const proc = o.st==='processing' ? `
+    <div class="card"><div class="hint" style="margin:0 0 6px">Мы проверяем поступление. Выплата в течение 1 часа. Осталось:</div>${timerHtml(o)}</div>
+    <button class="btn sec" data-act="ask" data-id="${o.id}">Написать оператору по заказу</button>
+    <div class="hint">Откроется чат с поддержкой, номер заказа скопируется. Вставьте его в сообщение и отправьте.</div>` : '';
+  return `
+  <button class="back" data-act="back">‹ Назад</button>
+  <h1>Заказ №${o.id}</h1>
+  <div class="card">
+    <div class="kv"><span>Статус</span><span>${statusHtml(o)}</span></div>
+    <div class="kv"><span>Отдаёте</span><span>${num(o.usdt)} USDT</span></div>
+    <div class="kv"><span>Получаете</span><span>${rub(o.rub)} ₽</span></div>
+    <div class="kv"><span>Сеть</span><span>${N.name}</span></div>
+    <div class="kv"><span>Курс</span><span>${fr(o.rate)} ₽</span></div>
+    <div class="kv"><span>Реквизиты</span><span>${esc(o.pay).replace(/\n/g,'<br>')}</span></div>
+    <div class="kv"><span>Создан</span><span>${when(o.created)}</span></div>
+    ${o.done ? `<div class="kv"><span>Выполнен</span><span>${when(o.done)}</span></div>` : ''}
+  </div>${pay}${proc}`;
+}
+
+const stars = n => '★'.repeat(n) + '☆'.repeat(5-n);
+const userName = () => (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.first_name) || 'Клиент';
+
+function viewReviews(){
+  let mine;
+  if(myReview && !editing){
+    mine = `<div class="card">
+      <div class="row"><span class="stars">${stars(myReview.stars)}</span><span class="rsub">${when(myReview.ts)}</span></div>
+      <p class="rtxt">${esc(myReview.text)}</p>
+      <button class="btn sec" data-act="editreview">Изменить отзыв</button>
+      <button class="btn sec" data-act="resend">Отправить нам ещё раз</button></div>`;
+  } else {
+    const pick = [1,2,3,4,5].map(n=>`<button data-act="star" data-n="${n}" class="${n<=draft.stars?'on':''}" aria-label="Оценка ${n}">★</button>`).join('');
+    mine = `<div class="card">
+      <div class="field"><label>Ваша оценка</label><div class="starpick">${pick}</div></div>
+      <div class="field"><label for="rtext">Что понравилось или что улучшить</label>
+        <textarea id="rtext" maxlength="300" placeholder="Напишите пару слов о вашем обмене">${esc(draft.text)}</textarea></div>
+      <div class="err" id="rerr">${esc(rerr)}</div>
+      <button class="btn pri" data-act="sendreview">Отправить отзыв</button>
+      <div class="hint">Отзыв сохранится у вас, откроется чат с поддержкой, а текст отзыва (оценка и комментарий) скопируется. Вставьте его в сообщение и отправьте.</div></div>`;
+  }
+  const pub = REVIEWS.length ? `<h2 style="font-family:var(--display);font-weight:500;font-size:17px;margin:22px 0 12px">Отзывы клиентов</h2>` +
+    REVIEWS.map(r=>`<div class="card"><div class="row"><b>${esc(r.name)}</b><span class="rsub">${esc(r.date||'')}</span></div>
+      <div class="stars">${stars(r.stars)}</div><p class="rtxt">${esc(r.text)}</p></div>`).join('') : '';
+  return `<h1>Отзывы</h1>${mine}${pub}`;
+}
+
+const REVIEWS_LINK = 'https://t.me/+X9R97B475EZiOTM6';
+function viewHome(){
+  const I = {
+    team:'<path d="M16 19v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1M9.5 10a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM21 19v-1a4 4 0 0 0-3-3.9M15 3.2a3.5 3.5 0 0 1 0 6.6"/>',
+    shield:'<path d="M12 3 4 6v6c0 4.5 3.2 8 8 9 4.8-1 8-4.5 8-9V6l-8-3ZM8.5 12l2.5 2.5 4.5-5"/>',
+    trend:'<path d="m3 17 6-6 4 4 8-8M15 7h6v6"/>',
+    headset:'<path d="M4 14v-2a8 8 0 0 1 16 0v2M4 14h3v5H5a1 1 0 0 1-1-1v-4ZM20 14h-3v5h2a1 1 0 0 0 1-1v-4ZM17 19c0 1.5-2 2-5 2"/>',
+    award:'<circle cx="12" cy="9" r="6"/><path d="m8.5 14.5-1.5 6.5 5-3 5 3-1.5-6.5"/>'
+  };
+  const feat = (ic, t, d, i) => `<div class="feat rise" style="animation-delay:${i*60}ms"><div class="ico"><svg viewBox="0 0 24 24">${I[ic]}</svg></div><div><b>${t}</b><span>${d}</span></div></div>`;
+  const nets = Object.keys(NETS).map(k=>`<span>${NETS[k].name}</span>`).join('');
+  return `
+  <section class="hero">
+    <svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3CC8FF"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient></defs>
+      <path d="M50 8 86 29v42L50 92 14 71V29Z" fill="none" stroke="url(#lg)" stroke-width="8" stroke-linejoin="round"/>
+      <path d="m52 52 24 24" stroke="url(#lg)" stroke-width="9" stroke-linecap="round"/></svg>
+    <div class="wm">qwymy<b>X</b></div>
+    <p>Услуги по выкупу криптовалюты за рубли. Мы работаем безопасно и прозрачно. Ваша безопасность — наш приоритет.</p>
+    <div class="ratepill"><i></i>1 USDT = ${fr(RATE)} ₽</div>
+    <button class="btn pri" data-tab="exchange">Обменять USDT</button>
+  </section>
+  <div class="stats rise"><div><b>5+</b><span>лет опыта</span></div><div><b>24/7</b><span>поддержка</span></div><div><b>1 час</b><span>на выплату</span></div></div>
+
+  <h2 class="sec">Что вы получаете</h2>
+  ${feat('team','Большая команда','Наши сотрудники обеспечивают поддержку 24/7 и бесперебойное регулирование всех процессов в онлайн-режиме.',0)}
+  ${feat('shield','Гарантия сделки','Мы единственный обменник, который не скрывает происхождение перевода. Каждая выплата на ваши реквизиты — это работа по кругу: каждая выплата — это покупка крипты у проверенного клиента.',1)}
+  ${feat('trend','Лучший курс','Постоянно мониторим рынок, чтобы предложить вам максимум.',2)}
+  ${feat('headset','Поддержка 24/7','Мы всегда на связи, ответим на любые вопросы.',3)}
+  ${feat('award','Опыт','Более 5 лет в сфере обмена цифровых активов. Репутация дороже всего.',4)}
+
+  <h2 class="sec">Как это работает</h2>
+  <div class="card"><ol class="steps">
+    <li>Выберите сеть и введите сумму в USDT</li>
+    <li>Укажите банк, номер карты или телефона и получателя</li>
+    <li>Отправьте USDT на адрес из заказа и нажмите «Я оплатил»</li>
+    <li>Получите рубли в течение 1 часа</li>
+  </ol></div>
+
+  <h2 class="sec">Что принимаем и как платим</h2>
+  <div class="card">
+    <div class="hint" style="margin:0 0 8px">Принимаем исключительно USDT, сети на выбор:</div>
+    <div class="chips">${nets}</div>
+    <div class="hint" style="margin:16px 0 8px">Выплата:</div>
+    <div class="chips"><span class="hl">Карта РФ</span><span class="hl">СБП</span></div>
+  </div>
+
+  <a class="btn sec" style="margin-top:16px" href="${REVIEWS_LINK}" data-tg="1">Читать отзывы клиентов</a>
+  <button class="btn sec" data-act="support">Написать в поддержку</button>`;
+}
+
+function viewSupport(){
+  return `
+  <h1>Support</h1>
+  <div class="card">
+    <p>Поможем с заказом, адресом или выплатой. Отвечаем в Telegram.</p>
+    <button class="btn pri" data-act="support">Открыть чат @${SUPPORT}</button>
+  </div>
+  <div class="card"><ol class="faq">
+    <li>Заказ исполняется в течение 1 часа после того, как вы нажали «Я оплатил».</li>
+    <li>Отправляйте только USDT в выбранной вами сети.</li>
+    <li>Если срок прошёл, а выплаты нет, напишите нам и назовите номер заказа.</li>
+  </ol></div>`;
+}
+
+function render(){
+  const app = $('#app');
+  const top = document.querySelector('.top'); if(top) top.style.display = tab==='home' ? 'none' : '';
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on', b.dataset.tab===tab));
+  if(tab==='home') app.innerHTML = viewHome();
+  else if(tab==='support') app.innerHTML = viewSupport();
+  else if(tab==='orders'){
+    const o = orders.find(x=>x.id===openId);
+    app.innerHTML = o ? viewOrder(o) : viewOrders();
+  } else { app.innerHTML = viewExchange(); if((form.step||1)===4) fillBanks(''); }
+  tick();
+}
+
+function tick(){
+  document.querySelectorAll('[data-dl]').forEach(el=>{
+    const left = +el.dataset.dl - Date.now();
+    if(left>0){ const s=Math.floor(left/1000); el.textContent = String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+    else el.textContent = 'Срок истёк — напишите в Support';
+  });
+}
+/* Через 1 час после «Я оплатил» заказ автоматически становится выполненным */
+function autoComplete(){
+  let changed = false;
+  orders.forEach(o=>{
+    if(o.st==='processing' && o.paid && Date.now() >= o.paid + HOUR){ o.st='done'; o.done=o.paid+HOUR; changed=true; }
+  });
+  if(changed){ store.set(orders); render(); toast('Заказ выполнен'); }
+  return changed;
+}
+setInterval(()=>{ if(!autoComplete()) tick(); }, 1000);
+
+/* ---------- действия ---------- */
+function update(id, patch){ const o=orders.find(x=>x.id===id); if(o){ Object.assign(o,patch); store.set(orders); } return o; }
+
+function focusFirst(){ setTimeout(()=>{ const f=document.querySelector('#usdt,#num,#pname'); if(f) f.focus(); }, 60); window.scrollTo(0,0); }
+
+function createOrder(){
+  const u = parseFloat(String(form.usdt).replace(',','.'));
+  if(!u || u<MIN){ form.step=1; error='Минимальная сумма — '+MIN+' USDT.'; return render(); }
+  const digits = form.num.replace(/\D/g,'');
+  if(!(digits.length===11 || (digits.length>=16 && digits.length<=19))){ form.step=3; error='Введите номер карты (16 цифр) или телефона (11 цифр).'; return render(); }
+  if(!form.bank){ form.step=4; error='Выберите банк получателя.'; return render(); }
+  if(!/[А-Яа-яЁёA-Za-z]{2,}/.test(form.pname) || form.pname.trim().length<3){ form.step=5; error='Укажите имя и фамилию получателя.'; return render(); }
+  error='';
+  const o = {id: +String(Date.now()).slice(-7), usdt:u, rub:Math.round(u*RATE*100)/100, rate:RATE, net:form.net,
+    pay:form.bank+'\n'+form.num.trim()+'\n'+form.pname.trim(), st:'awaiting', created:Date.now(), paid:0};
+  orders.unshift(o); store.set(orders);
+  form = {usdt:'', bank:'', num:'', pname:'', net:form.net, step:1}; tab='orders'; openId=o.id; render(); window.scrollTo(0,0);
+}
+
+function wizardNext(){
+  const st = form.step || 1;
+  if(st===1){
+    const u = parseFloat(String(form.usdt).replace(',','.'));
+    if(!u || u<MIN){ error='Минимальная сумма — '+MIN+' USDT.'; return render(); }
+  }
+  if(st===3){
+    const digits = form.num.replace(/\D/g,'');
+    if(!(digits.length===11 || (digits.length>=16 && digits.length<=19))){ error='Введите номер карты (16 цифр) или телефона (11 цифр).'; return render(); }
+  }
+  if(st===4 && !form.bank){ error='Выберите банк получателя.'; return render(); }
+  if(st===5) return createOrder();
+  error=''; form.step = st+1; render(); focusFirst();
+}
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='Enter' && e.target.matches && e.target.matches('#usdt,#num,#pname')){ e.preventDefault(); wizardNext(); }
+});
+
+document.addEventListener('input', e=>{
+  if(e.target.id==='usdt'){
+    form.usdt = e.target.value;
+    const u = parseFloat(form.usdt.replace(',','.')) || 0;
+    $('#get').innerHTML = rub(u*RATE)+' <small>₽</small>';
+  }
+  if(e.target.id==='num') form.num = e.target.value;
+  if(e.target.id==='pname') form.pname = e.target.value;
+  if(e.target.id==='bsearch') fillBanks(e.target.value);
+  if(e.target.id==='rtext') draft.text = e.target.value;
+});
+
+document.addEventListener('click', e=>{
+  const a = e.target.closest('a[data-tg]');
+  if(a){ e.preventDefault(); if(tg && tg.openTelegramLink) tg.openTelegramLink(a.href); else window.open(a.href,'_blank'); return; }
+  const t = e.target.closest('button'); if(!t) return;
+  if(t.dataset.net){ form.net = t.dataset.net; render(); return; }
+  if(t.dataset.tab){ tab=t.dataset.tab; openId=null; render(); return; }
+  if(t.dataset.seg){ seg=t.dataset.seg; render(); return; }
+  if(t.dataset.sheet==='close'){ closeSheet(); return; }
+  if(t.dataset.bank!==undefined){ form.bank = t.dataset.bank; error=''; closeSheet(); if(form.step===4) form.step=5; render(); focusFirst(); return; }
+  const id = +t.dataset.id, act = t.dataset.act;
+  if(act==='copy') copy(t.dataset.v);
+  else if(act==='support') openSupport();
+  else if(act==='bank') openSheet();
+  else if(act==='open'){ openId=id; render(); }
+  else if(act==='back'){ openId=null; render(); }
+  else if(act==='wnext') wizardNext();
+  else if(act==='wback'){ error=''; form.step = Math.max(1,(form.step||1)-1); render(); focusFirst(); }
+  else if(act==='star'){ draft.stars = +t.dataset.n; rerr=''; render(); }
+  else if(act==='sendreview'){
+    const text = draft.text.trim();
+    if(draft.stars<1){ rerr='Поставьте оценку от 1 до 5.'; return render(); }
+    if(text.length<3){ rerr='Напишите хотя бы пару слов.'; return render(); }
+    rerr=''; myReview = {stars:draft.stars, text, ts:Date.now()}; rstore.set(myReview); editing=false; render();
+    toast('Отзыв сохранён');
+    openSupport('Отзыв '+stars(myReview.stars)+'\n'+text+'\n— '+userName());
+  }
+  else if(act==='editreview'){ draft = {stars:myReview.stars, text:myReview.text}; editing=true; rerr=''; render(); }
+  else if(act==='resend'){ openSupport('Отзыв '+stars(myReview.stars)+'\n'+myReview.text+'\n— '+userName()); }
+  else if(act==='paid'){ const o=update(id,{st:'processing', paid:Date.now()}); render(); if(o) openSupport(orderMessage(o)); }
+  else if(act==='cancel'){ update(id,{st:'cancelled'}); openId=null; seg='history'; render(); }
+  else if(act==='ask'){ const o=orders.find(x=>x.id===id); if(o) openSupport(orderMessage(o)); }
+});
+
+Promise.all([store.get(), rstore.get()]).then(([list, rv])=>{
+  orders = Array.isArray(list)?list:[]; myReview = rv; if(!autoComplete()) render();
+});
+</script>
+</body>
+</html>
